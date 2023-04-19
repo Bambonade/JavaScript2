@@ -1,0 +1,126 @@
+<template>
+    <div class="q-pa-md">
+        <h1 class="text-h3 q-mt-xl">Toolbox App</h1>
+        <q-form @submit.prevent="addTool">
+            <q-input v-model="newToolName" label="Add Tool" placeholder="Tool Name" />
+            <q-btn type="submit" label="Add" class="q-ml-md" />
+        </q-form>
+        <q-list bordered class="q-my-md">
+            <q-item v-for="(tool, index) in tools" :key="tool.id">
+                <q-item-section>
+                    <q-input v-model="tool.name" dense />
+                </q-item-section>
+                <q-item-section side>
+                    <q-btn icon="delete" @click="deleteTool(index)" />
+                </q-item-section>
+            </q-item>
+        </q-list>
+        <q-separator />
+        <q-card v-for="(drawer, index) in drawers" :key="drawer.id" class="q-my-md">
+            <q-card-section>
+                <h2 class="text-h5">Drawer {{ index + 1 }}</h2>
+                <q-form @submit.prevent="addToolToDrawer(index)">
+                    <q-select v-model="selectedToolId" label="Add Tool" :options="tools.map(tool => ({ value: tool.id, label: tool.name }))" />
+                    <q-btn type="submit" label="Add" class="q-ml-md" />
+                </q-form>
+            </q-card-section>
+            <q-list bordered>
+                <q-item v-for="(tool, index) in drawer.tools" :key="tool.id">
+                    <q-item-section>
+                        <q-input v-model="tool.name" dense />
+                    </q-item-section>
+                    <q-item-section side>
+                        <q-btn icon="delete" @click="deleteToolFromDrawer(index, drawer)" />
+                    </q-item-section>
+                </q-item>
+            </q-list>
+        </q-card>
+    </div>
+</template>
+
+<script>
+import { ref } from 'vue';
+import { QBtn, QCard, QCardSection, QForm, QInput, QItem, QItemSection, QList, QSelect, QSeparator } from 'quasar';
+
+export default {
+    name: 'ToolboxApp',
+    components: { QBtn, QCard, QCardSection, QForm, QInput, QItem, QItemSection, QList, QSelect, QSeparator },
+    setup() {
+        const tools = ref([
+            { id: 1, name: 'Hammer' },
+            { id: 2, name: 'Screwdriver' },
+            { id: 3, name: 'Wrench' },
+        ]);
+
+        const drawers = ref([
+            { id: 1, tools: [] },
+            { id: 2, tools: [] },
+            { id: 3, tools: [] },
+        ]);
+
+        const newToolName = ref('');
+        const selectedToolId = ref(null);
+
+        function addTool() {
+            const newTool = {
+                id: tools.value.length + 1,
+                name: newToolName.value,
+            };
+            tools.value.push(newTool);
+            newToolName.value = '';
+        }
+
+        function deleteTool(index) {
+            tools.value.splice(index, 1);
+        }
+
+        function addToolToDrawer(drawerIndex) {
+            const selectedTool = tools.value.find((tool) => tool.id === selectedToolId.value);
+            if (selectedTool) {
+                drawers.value[drawerIndex].tools.push(selectedTool);
+            }
+        }
+
+        function deleteToolFromDrawer(toolIndex, drawer) {
+            drawer.tools.splice(toolIndex, 1);
+        }
+
+        return {
+            tools,
+            drawers,
+            newToolName,
+            selectedToolId,
+            addTool,
+            deleteTool,
+            addToolToDrawer,
+            deleteToolFromDrawer,
+        };
+    },
+};
+</script>
+
+<style>
+/* Apply padding to top and bottom of the component */
+.q-pa-md {
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+/* Center the component horizontally */
+#app {
+    display: flex;
+    justify-content: center;
+}
+
+/* Center the h1 element vertically */
+.text-h3 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+/* Add a margin below the h2 elements */
+.text-h5 {
+    margin-bottom: 8px;
+}
+</style>
